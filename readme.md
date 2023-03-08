@@ -23,28 +23,28 @@
     ],
     "model": "gpt-3.5-turbo",
     "max_tokens": 2048,
-    "temperature": 0.9,
+    "temperature": 0.7,
     "top_p": 1, 
     "stream": false,
     "n":1,
-    "presence_penalty": 0,
+    "presence_penalty": 0.6,
     "frequency_penalty": 0.6,
-    "user": "harry"
+    "user": "bluoruo"
 }
 ```
-### 说明
+### 请求Json说明
 #### messages: 
-###### 消息主体，和openai交互的信息内容 是数组型
+###### 消息主体，程序和openai交互的信息内容 是数组类型
 **结构**: \
-数组 `json{"role":"","content"}` \
+数组 `json{"role":"","content":""}` \
 \
 **数组内role**: \
-system: 是代表给系统一个类型，比如说是开发的，贸易的还是翻译的 \
+system: 是代表给openai的一个参考，比如说是开发的、新闻、文字编辑或者语言翻译等 \
 user: 具体问题内容 \
 \
 **数组内content**： \
-role=system 的时候 代表一个问题的类型 \
-role-user 的时候代表问题的具体内容
+role=system 的时候代表一个话题的类型 \
+role-user 的时候代表话题的具体内容
 
 #### model:
 ###### 使用那种模型作为引擎，GTP-3.5推荐模型列表：
@@ -57,15 +57,15 @@ role-user 的时候代表问题的具体内容
 | code-davinci-002   | 代码处理进行优化          | 4000 | 2021-9 |
 
 #### max_tokens: `deafult:inf`
-###### 回答内容的最大长度，之所以是token而不是byte，是应为openai返回数据是stream模式，stream交互一次被看做是一个token。所以token<字数
+###### 回答内容的最大长度，之所以是tokens而不是bytes，个人理解：是因为openai返回数据是stream模式，stream交互一次被看做是一个token
 #### temperature: `deafult:1`
-###### temper采样率控制,0~2之间。数值越小答案越单一，数值越大答案越随机。<有待进一步调试> 和top_p 互相制约，调试时建议只更改其中一个
+###### 采样率控制,0~2之间。数值越小回答越单一，数值越大答案越随机。<有待进一步调试> temperature和top_p 互相制约，建议只更改其中一个
 #### top_p: `deafult:1`
-###### 核心采样率控制,和temperature互相制约。 0.1代表采样率是10%的核心标记
+###### 核心采样率控制,top_p和temperature互相制约。 0.1代表采样率是10%的核心标记
 #### n: `deafult:1`
-###### 控制放回内容停止在哪里，1代表停止在内容结尾
+###### 控制返回内容停止在哪里，1代表停止在内容结尾
 #### stream: `deafult:false`
-###### 是否使用stream模式，stream模式效果类似于ChatGPT网页问答效果，结束标示符 `data: [DONE]`
+###### 是否使用stream模式，stream模式效果类似于ChatGPT网页问答效果。结束符 `data: [DONE]`
 #### stop: `deafult:null`
 ###### 立即停止，告诉openai停止生成更多的tokens
 #### presence_penalty:
@@ -79,7 +79,7 @@ role-user 的时候代表问题的具体内容
 确切的效果因模型而异，但 -1 和 1 之间的值应该会减少或增加选择的可能性；\
 像 -100 或 100 这样的值应该导致相关令牌的禁止或独占选择。)
 #### user:
-###### 告诉OpenAi消息会话的用户，用来控制违反规则的问话排查
+###### 告诉OpenAi消息会话的用户，用来控制违反规则的会话
 
 ### 弃用的参数
 ~~suffix: 后缀或者前缀，这个参数已经被最新版本启用~~
@@ -88,7 +88,7 @@ role-user 的时候代表问题的具体内容
 ### Json:
 ```json
 {
-    "id": "chatcmpl-abc123123123123",
+    "id": "chatcmpl-abc123123123123xxx",
     "object": "chat.completion",
     "created": 1678252628,
     "model": "gpt-3.5-turbo-0301",
@@ -101,7 +101,7 @@ role-user 的时候代表问题的具体内容
         {
             "message": {
                 "role": "assistant",
-                "content": "以下是使用golang进行icmp监听的示例代码：\n\n```go\npackage main\n\nimport (\n    \"fmt\"\n    \"golang.org/x/net/icmp\"\n    \"golang.org/x/net/ipv4\"\n    \"log\"\n)\n\nfunc main() {\n    conn, err := icmp.ListenPacket(\"ip4:icmp\", \"0.0.0.0\")\n    if err != nil {\n        log.Fatal(err)\n    }\n    defer conn.Close()\n\n    buf := make([]byte, 1024)\n    for {\n        n, addr, err := conn.ReadFrom(buf)\n        if err != nil {\n            log.Fatal(err)\n        }\n        msg, err := icmp.ParseMessage(1, buf[:n])\n        if err != nil {\n            log.Fatal(err)\n        }\n\n        switch msg.Type {\n\t\tcase ipv4.ICMPTypeEcho:\n\t\t\tlog.Printf(\"Received ICMP echo request from %v: %s\\n\", addr.String(), string(msg.Body))\n\t\t\t// 创建ICMP回应消息\n\t\t\techoReplyMsg := icmp.Message{\n\t\t\t\tType: ipv4.ICMPTypeEchoReply,\n\t\t\t\tCode: 0,\n\t\t\t\tBody: &icmp.Echo{\n\t\t\t\t\tID:   msg.Body.(*icmp.Echo).ID,\n\t\t\t\t\tSeq:  msg.Body.(*icmp.Echo).Seq,\n\t\t\t\t\tData: []byte(\"pong\"),\n\t\t\t\t},\n\t\t\t}\n\t\t\techoReplyBytes, _ := echoReplyMsg.Marshal(nil)\n\t\t\tconn.WriteTo(echoReplyBytes, addr)\n\n\t        default:\n\t            log.Printf(\"Received %+v from %v\\n\", msg, addr.String())\n\t        }\n\t    }\n}\n```\n\n运行后，程序将等待来自任何IP地址的ICMP消息，并在接收到ICMP echo请求时发送一个ICMP Echo Reply消息作为回应。"
+                "content": "下面是一个简单的Go程序，输出\"Hello World!\"。\n\n```go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"Hello World!\")\n}\n```\n\n打开命令行工具，执行以下命令运行程序：\n\n```\ngo run hello.go\n```\n\n这将在终端中打印出 \"Hello World!\"。"
             },
             "finish_reason": "stop",
             "index": 0
@@ -109,3 +109,24 @@ role-user 的时候代表问题的具体内容
     ]
 }
 ```
+### 返回Json说明
+#### id: `chatcmpl-xxxxxx`
+###### openai给出的会话ID,可用于调试或者排查。
+#### object: `chat.completion`
+###### 使用的引擎
+#### created:
+###### 会话创建的时间，unix时间格式
+#### model:
+###### 使用的引擎
+#### usage:
+###### 使用的tokens信息，可以用来监控和控制使用openai的成本。
+**prompt_tokens**: 用户请求的tokens数量\
+**completion_tokens**: openai处理的tokens数量\
+**total_tokens**: 本次会话总共tokens数量
+#### choices: 
+###### 会话返回的主消息体
+**message**: 消息体内容\
+message.role: 消息类型
+message.content: 消息内容
+**finish_reason**: 结束\
+**index**: 索引
