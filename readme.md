@@ -18,7 +18,15 @@
         },
         {
             "role": "user",
-            "content": "使用golang 完成icmp的监听"
+            "content": "你好"
+        }, 
+        {
+            "role": "assistant",
+            "content": "好"
+        },
+        {
+            "role": "user",
+            "content": "使用golang 完成HelloWorld"
         }
     ],
     "model": "gpt-3.5-turbo",
@@ -35,16 +43,19 @@
 ### 请求Json说明
 #### messages: 
 ###### 消息主体，程序和openai交互的信息内容 是数组类型
+
 **结构**: \
-数组 `json{"role":"","content":""}` \
-\
+数组 `json{"role":"","content":""}` 
+
 **数组内role**: \
 system: 是代表给openai的一个参考，比如说是开发的、新闻、文字编辑或者语言翻译等 \
 user: 具体问题内容 \
-\
+新版本在此处可以加入联系上下文的功能，把上次对话的整个内容保存在messages消息内容内。\
+GPT-3.5会更好的处理您的相关问题，而不是简单回答当前问题。
+
 **数组内content**： \
-role=system 的时候代表一个话题的类型 \
-role-user 的时候代表话题的具体内容
+role=system 的时候代表一个话题的类型\
+role=user 的时候代表话题的具体内容
 
 #### model:
 ###### 使用那种模型作为引擎，GTP-3.5推荐模型列表：
@@ -126,7 +137,13 @@ role-user 的时候代表话题的具体内容
 #### choices: 
 ###### 会话返回的主消息体
 **message**: 消息体内容\
-message.role: 消息类型
-message.content: 消息内容
-**finish_reason**: 结束\
-**index**: 索引
+message.role: 消息类型 \
+message.content: 消息内容 
+
+**finish_reason**:  \
+stop: 已经完整的返回了内容 \
+length: 因为max_tokens参数，限制了输出内容 \
+content_filter: 内过滤了 \
+null: api响应中，或者处理出错了 
+
+**index**: 索引，暂时不理解
